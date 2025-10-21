@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { sign, verify } from "hono/jwt";
+import { useId } from "hono/jsx";
+
 
 const app = new Hono<{
   Bindings: {
@@ -23,18 +25,20 @@ const app = new Hono<{
 
 // Middlewares for The Auth Route
 app.use("/api/v1/blog/*", async (c, next) => {
-  const jwt = c.req.header("Authorization");
+  const jwt = c.req.header('Authorization');
   if (!jwt) {
-    c.status(401);
-    return c.json({ error: "unauthorized" });
+    c.status(401)
+    return c.json({error:"Unauthorized"})
   }
-  const token = jwt.split(" ")[1];
-  const payload = await verify(token, c.env.JWT_SECRET);
-  if (!payload) {
-    c.status(401);
-    return c.json({ error: "unauthorized" });
+  const token = jwt.split('')[1]
+  const payload = await verify(token,c.env.JWT_SECRET)
+  if(!payload){
+    c.status(401)
+    return c.json({
+      error : "Unauthorized"
+    })
   }
-  c.set("userId", payload.id);
+  c.set('userId',payload.id)
   await next();
 });
 

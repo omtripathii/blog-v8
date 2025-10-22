@@ -41,21 +41,88 @@ blogRouter.use("/*", async (c, next) => {
   c.set("email", payload.email as string);
   await next();
 });
-// Fething all the blogs
-blogRouter.get("/:id", (c) => {
+
+// Fething blog by id
+blogRouter.get("/:id", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
   const id = c.req.param("id");
-  return c.text(`get blog route ${id}`);
+  try {
+    const blog = await prisma.post.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    return c.json({
+      data: blog,
+    });
+  } catch (error) {
+    return c.text(`Something Went Wrong ${error}`);
+  }
 });
+
 //Create Blog
-blogRouter.post("/", (c) => {
-  console.log(c.get("userId"));
-  console.log(c.get("email"));
-  return c.text("signin route");
+blogRouter.post("/", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  const body = await c.req.json();
+  const authorId = c.get("userId");
+  try {
+    const blog = await prisma.post.create({
+      data: {
+        title: body.title,
+        content: body.content,
+        authorId: authorId,
+      },
+    });
+    return c.json({
+      id: blog.id,
+    });
+  } catch (error) {
+    c.status(500);
+    return c.text(`Something Went Wrong ${error}`);
+  }
 });
 //Modify Blog
-blogRouter.put("/", (c) => {
-  return c.text("Blog Modified");
+blogRouter.patch("/:id", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const body = await c.req.json();
+    //   const id = c.req.param("id");
+    const modifiedBlog = await prisma.post.update({
+      where: {
+        id: body.id,
+      },
+      data: {
+        title: body.title,
+        content: body.content,
+      },
+    });
+    return c.json({
+      id: modifiedBlog.id,
+      msg: "Blog Modified",
+    });
+  } catch (error) {
+    return c.text(`Something Went Wrong ${error}`);
+  }
+});
+
+// Fetching All Blogs
+blogRouter.get("/bulk", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const blogs = await prisma.post.findMany();
+    return c.json({
+      blogs,
+    });
+  } catch (error) {
+    return c.text(`Something Went Wrong ${error}`);
+  }
 });

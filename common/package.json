@@ -1,0 +1,25 @@
+{
+  "name": "@om.tripathi/medium-common",
+  "version": "1.0.0",
+  "description": "Common validation schemas for Medium clone",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["validation", "zod", "medium"],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist"
+  ]
+}

@@ -2,6 +2,8 @@ import { Hono } from "hono";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { sign, verify } from "hono/jwt";
+import { createBlogInput, updateBlogInput } from "@om.tripathi/medium-common";
+
 export const blogRouter = new Hono<{
   Bindings: {
     DATABASE_URL: string;
@@ -88,12 +90,20 @@ blogRouter.post("/", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
+  
+  // Validation
+  const { success, data } = createBlogInput.safeParse(body);
+  if (!success) {
+    c.status(400);
+    return c.json({ error: "Invalid input" });
+  }
+
   const authorId = c.get("userId");
   try {
     const blog = await prisma.post.create({
       data: {
-        title: body.title,
-        content: body.content,
+        title: data.title,
+        content: data.content,
         authorId: authorId,
       },
     });
@@ -111,8 +121,17 @@ blogRouter.patch("/:id", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
+  
   try {
     const body = await c.req.json();
+    
+    // Validation
+    const { success, data } = updateBlogInput.safeParse(body);
+    if (!success) {
+      c.status(400);
+      return c.json({ error: "Invalid input" });
+    }
+
     const id = c.req.param("id");
     const userId = c.get("userId");
     
@@ -134,8 +153,8 @@ blogRouter.patch("/:id", async (c) => {
         id: id,
       },
       data: {
-        title: body.title,
-        content: body.content,
+        title: data.title,
+        content: data.content,
       },
     });
     return c.json({

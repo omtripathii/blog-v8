@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { sign } from "hono/jwt";
+import { signupInput, signinInput } from "@om.tripathi/medium-common";
 
 export const userRouter = new Hono<{
   Bindings: {
@@ -35,19 +36,21 @@ userRouter.post("/signup", async (c) => {
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  // Input Validation
-  interface GetCredentialsType {
-    email: string;
-    password: string;
+  const body = await c.req.json();
+  
+  // Validation
+  const { success, data } = signupInput.safeParse(body);
+  if (!success) {
+    c.status(400);
+    return c.json({ error: "Invalid input" });
   }
 
-  const getCredentials: GetCredentialsType = await c.req.json();
-  const { email, password } = getCredentials;
   try {
     const user = await prisma.user.create({
       data: {
-        email: email,
-        password: password,
+        email: data.email,
+        password: data.password,
+        name: data.name
       },
     });
     // Jwt Token Cretion
@@ -67,17 +70,19 @@ userRouter.post("/signin", async (c) => {
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
 
-  interface GetCredentialsType {
-    email: string;
-    password: string;
+  const body = await c.req.json();
+  
+  // Validation
+  const { success, data } = signinInput.safeParse(body);
+  if (!success) {
+    c.status(400);
+    return c.json({ error: "Invalid input" });
   }
-  const getCredentials: GetCredentialsType = await c.req.json();
-  const { email, password } = getCredentials;
 
   const user = await prisma.user.findUnique({
     where: {
-      email: email,
-      password: password,
+      email: data.email,
+      password: data.password,
     },
   });
   if (!user) {

@@ -46,6 +46,21 @@ blogRouter.use("/*", async (c, next) => {
   await next();
 });
 
+// Fetching All Blogs - MOVED BEFORE /:id route
+blogRouter.get("/bulk", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const blogs = await prisma.post.findMany({});
+    return c.json({
+      blogs,
+    });
+  } catch (error) {
+    return c.text(`Something Went Wrong ${error}`);
+  }
+});
+
 // Fething blog by id
 blogRouter.get("/:id", async (c) => {
   const prisma = new PrismaClient({
@@ -90,6 +105,7 @@ blogRouter.post("/", async (c) => {
     return c.text(`Something Went Wrong ${error}`);
   }
 });
+
 //Modify Blog
 blogRouter.patch("/:id", async (c) => {
   const prisma = new PrismaClient({
@@ -97,12 +113,25 @@ blogRouter.patch("/:id", async (c) => {
   }).$extends(withAccelerate());
   try {
     const body = await c.req.json();
-    //   const id = c.req.param("id");
+    const id = c.req.param("id");
     const userId = c.get("userId");
+    
+    // check if the blog exists and belongs to same user
+    const existingBlog = await prisma.post.findFirst({
+      where: {
+        id: id,
+        authorId: userId,
+      },
+    });
+    
+    if (!existingBlog) {
+      c.status(404);
+      return c.json({ error: "Blog not found or you don't have permission to modify it" });
+    }
+    
     const modifiedBlog = await prisma.post.update({
       where: {
-        id: body.id,
-        authorId: userId,
+        id: id,
       },
       data: {
         title: body.title,
@@ -112,21 +141,6 @@ blogRouter.patch("/:id", async (c) => {
     return c.json({
       id: modifiedBlog.id,
       msg: "Blog Modified",
-    });
-  } catch (error) {
-    return c.text(`Something Went Wrong ${error}`);
-  }
-});
-
-// Fetching All Blogs
-blogRouter.get("/bulk", async (c) => {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env?.DATABASE_URL,
-  }).$extends(withAccelerate());
-  try {
-    const blogs = await prisma.post.findMany();
-    return c.json({
-      blogs,
     });
   } catch (error) {
     return c.text(`Something Went Wrong ${error}`);

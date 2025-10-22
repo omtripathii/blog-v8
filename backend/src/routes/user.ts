@@ -24,6 +24,11 @@ export const userRouter = new Hono<{
 //   await next();
 // });
 
+/**
+ * Add Hashing into the password
+ * Add the cookie based token storage
+ */
+
 // Signup
 userRouter.post("/signup", async (c) => {
   const prisma = new PrismaClient({

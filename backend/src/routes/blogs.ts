@@ -22,6 +22,10 @@ export const blogRouter = new Hono<{
 //   await next();
 // });
 
+/**
+ * Add Pagination onto the Blogs 
+ */
+
 // Middlewares for The Auth Route
 blogRouter.use("/*", async (c, next) => {
   const jwt = c.req.header("Authorization");
@@ -55,7 +59,7 @@ blogRouter.get("/:id", async (c) => {
       },
     });
     return c.json({
-      data: blog,
+      blog,
     });
   } catch (error) {
     return c.text(`Something Went Wrong ${error}`);
@@ -94,9 +98,11 @@ blogRouter.patch("/:id", async (c) => {
   try {
     const body = await c.req.json();
     //   const id = c.req.param("id");
+    const userId = c.get("userId");
     const modifiedBlog = await prisma.post.update({
       where: {
         id: body.id,
+        authorId: userId,
       },
       data: {
         title: body.title,

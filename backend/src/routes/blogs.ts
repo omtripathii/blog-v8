@@ -10,7 +10,7 @@ export const blogRouter = new Hono<{
   Variables: {
     userId: string;
     email: string;
-    prisma:any;
+    prisma: any;
   };
 }>();
 
@@ -24,23 +24,21 @@ export const blogRouter = new Hono<{
 
 // Middlewares for The Auth Route
 blogRouter.use("/*", async (c, next) => {
-  const jwt = c.req.header('Authorization');
+  const jwt = c.req.header("Authorization");
   if (!jwt) {
-    c.status(401)
-    return c.json({error:"Unauthorized"})
+    c.status(401);
+    return c.json({ error: "Unauthorized" });
   }
-  const token = jwt.split(' ')[1]
-  const payload = await verify(token,c.env.JWT_SECRET)
-  if(!payload){
-    c.status(401)
+  const token = jwt.split(" ")[1];
+  const payload = await verify(token, c.env.JWT_SECRET);
+  if (!payload) {
+    c.status(401);
     return c.json({
-      error : "Unauthorized"
-    })
+      error: "Unauthorized",
+    });
   }
-//   @ts-ignore
-  c.set('userId',payload.id)
-  //@ts-ignore
-  c.set('email',payload.email)
+  c.set("userId", payload.id as string);
+  c.set("email", payload.email as string);
   await next();
 });
 // Fething all the blogs

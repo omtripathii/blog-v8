@@ -1,7 +1,10 @@
 import { useState } from "react";
 import type { SigninInput } from "@om.tripathi/medium-common";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { BACKEND_URL } from "../config";
+import axios from "axios";
 export const Signin = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState<SigninInput>({
     email: "",
     password: "",
@@ -11,10 +14,20 @@ export const Signin = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Signin form submitted:", form);
-    // TODO: Send this data to your backend API
+    try {
+      const response = await axios.post(
+        `${BACKEND_URL}/api/v1/user/signin`,
+        form
+      );
+      const jwt = response.data.jwt;
+      localStorage.setItem("token", jwt);
+      console.log("Signin form submitted:", form);
+      navigate("/blogs");
+    } catch (error) {
+      alert("Something went Wrong PLease Try Again");
+    }
   };
 
   return (

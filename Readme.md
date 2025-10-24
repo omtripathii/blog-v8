@@ -4,10 +4,10 @@ A modern, full-stack Medium-inspired blogging platform built with React, TypeScr
 
 ## 📸 Screenshots
 
-![Screenshot](./assets/1.png)
-![Screenshot](./assets/2.png)
-![Screenshot](./assets/3.png)
-![Screenshot](./assets/4.png)
+![Screenshot](./assests/1.png)
+![Screenshot](./assests/2.png)
+![Screenshot](./assests/3.png)
+![Screenshot](./assests/4.png)
 
 
 

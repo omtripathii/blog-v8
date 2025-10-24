@@ -45,8 +45,11 @@ export const Blog = () => {
   return (
     <div>
       <FullBlog
+        //@ts-ignore
         authorName={blogDetails?.user?.name || "Anonymous"}
+        //@ts-ignore
         title={blogDetails?.title || "Loading..."}
+        //@ts-ignore
         content={blogDetails?.content || "Loading content..."}
       />
     </div>

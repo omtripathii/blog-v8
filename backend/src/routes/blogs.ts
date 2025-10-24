@@ -146,6 +146,17 @@ blogRouter.get("/:id", async (c) => {
       where: {
         id: id,
       },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        published: true,
+      },
     });
     return c.json({
       blog,
@@ -156,7 +167,7 @@ blogRouter.get("/:id", async (c) => {
 });
 
 //Create Blog
-blogRouter.post("/", async (c) => {
+blogRouter.post("/create", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());

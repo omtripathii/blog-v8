@@ -1,9 +1,11 @@
+import { useNavigate } from "react-router-dom";
+
 interface PropsType {
   authorName: string;
   publishedDate: string;
   title: string;
   content: string;
-  onClick?: () => void;
+  id: string;
 }
 
 export const BlogCard = ({
@@ -11,14 +13,17 @@ export const BlogCard = ({
   publishedDate,
   title,
   content,
-  onClick,
+  id,
 }: PropsType) => {
+  const navigate = useNavigate();
   const wordCount = content.length / 5;
   const readingTime = Math.ceil(wordCount / 200);
-
+  function handleonClick() {
+    navigate(`/blog/${id}`);
+  }
   return (
     <div
-      onClick={onClick}
+      onClick={handleonClick}
       className="
         w-full p-6 cursor-pointer border border-slate-200 rounded-2xl
         hover:shadow-md hover:border-slate-300 transition-all duration-200 ease-in-out
@@ -28,7 +33,9 @@ export const BlogCard = ({
       <div className="flex items-center space-x-3 pb-3">
         <Avatar name={authorName} />
         <div className="flex items-center text-sm text-slate-600">
-          <span className="font-semibold text-slate-800">{authorName ? authorName:"Anonymous"}</span>
+          <span className="font-semibold text-slate-800">
+            {authorName ? authorName : "Anonymous"}
+          </span>
           <DotSeparator />
           <span className="text-slate-500">{publishedDate}</span>
         </div>
@@ -54,7 +61,7 @@ const DotSeparator = () => (
 
 interface AvatarProps {
   name?: string | "A";
-  size?: number; // size in pixels 
+  size?: number; // size in pixels
 }
 
 export function Avatar({ name, size = 32 }: AvatarProps) {
@@ -74,5 +81,3 @@ export function Avatar({ name, size = 32 }: AvatarProps) {
     </div>
   );
 }
-
-

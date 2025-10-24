@@ -25,7 +25,12 @@ const app = new Hono<{
 //   }).$extends(withAccelerate());
 //   c.set("prisma", prisma);
 // })
-app.use('/*', cors())
+app.use('/*', cors({
+  origin: [
+    'https://blog-v8.vercel.app',
+    'https://blog-v8-qe8n8fhom-om-tripathis-projects.vercel.app'
+  ]
+}))
 app.route("/api/v1/user",userRouter)
 app.route("/api/v1/blog",blogRouter)
 

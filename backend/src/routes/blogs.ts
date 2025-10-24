@@ -25,27 +25,86 @@ export const blogRouter = new Hono<{
 // });
 
 /**
- * Add Pagination onto the Blogs 
+ * Add Pagination onto the Blogs
  */
 
 // Middlewares for The Auth Route
 blogRouter.use("/*", async (c, next) => {
-  const jwt = c.req.header("Authorization");
-  if (!jwt) {
-    c.status(401);
-    return c.json({ error: "Unauthorized" });
+  try {
+    const authHeader = c.req.header("Authorization");
+    // console.log("Auth header:", authHeader); // Debug log
+
+    if (!authHeader) {
+      console.log("No authorization header found");
+      return c.json({ error: "Authorization header is required" }, 401);
+    }
+
+    if (!authHeader.startsWith("Bearer ")) {
+      console.log("Invalid authorization header format");
+      return c.json({ error: "Bearer token required" }, 401);
+    }
+
+    const token = authHeader.substring(7);
+    // console.log("Extracted token:", token ? "exists" : "null/undefined");
+
+    if (!token || token === "null" || token === "undefined") {
+      console.log("Token is null or undefined");
+      return c.json({ error: "Invalid token" }, 401);
+    }
+
+    const decoded = await verify(token, c.env.JWT_SECRET);
+    // console.log("Decoded payload:", decoded);
+
+    const userId = decoded.id || decoded.userId;
+
+    if (!userId) {
+      console.log("No id or userId found in token payload");
+      return c.json({ error: "Invalid token payload" }, 401);
+    }
+
+    // console.log("Token decoded successfully for user:", userId);
+    c.set("userId", userId as string);
+
+    await next();
+  } catch (error) {
+    console.error("JWT verification error:", error);
+    return c.json({ error: "Invalid or expired token" }, 401);
   }
-  const token = jwt.split(" ")[1];
-  const payload = await verify(token, c.env.JWT_SECRET);
-  if (!payload) {
-    c.status(401);
-    return c.json({
-      error: "Unauthorized",
+});
+
+//Logged In User Details
+blogRouter.get("/userDetails", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env?.DATABASE_URL,
+  }).$extends(withAccelerate());
+
+  try {
+    const userId = c.get("userId");
+    // console.log("UserId from context:", userId); // Debug log
+
+    if (!userId) {
+      return c.json({ error: "User ID not found in context" }, 401);
+    }
+
+    const userDetails = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        name: true,
+        email: true,
+      },
     });
+
+    if (!userDetails) {
+      return c.json({ error: "User not found" }, 404);
+    }
+
+    return c.json(userDetails); // Return userDetails directly, not wrapped
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    return c.json({ error: `Something Went Wrong: ${error}` }, 500);
   }
-  c.set("userId", payload.id as string);
-  c.set("email", payload.email as string);
-  await next();
 });
 
 // Fetching All Blogs - MOVED BEFORE /:id route
@@ -54,12 +113,25 @@ blogRouter.get("/bulk", async (c) => {
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
   try {
-    const blogs = await prisma.post.findMany({});
+    const blogs = await prisma.post.findMany({
+      select: {
+        title: true,
+        content: true,
+        id: true,
+        published: true,
+        user: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
     return c.json({
       blogs,
     });
   } catch (error) {
-    return c.text(`Something Went Wrong ${error}`);
+    console.error("Error fetching blogs:", error);
+    return c.json({ error: `Something Went Wrong: ${error}` }, 500);
   }
 });
 
@@ -90,7 +162,7 @@ blogRouter.post("/", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
-  
+
   // Validation
   const { success, data } = createBlogInput.safeParse(body);
   if (!success) {
@@ -121,10 +193,10 @@ blogRouter.patch("/:id", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,
   }).$extends(withAccelerate());
-  
+
   try {
     const body = await c.req.json();
-    
+
     // Validation
     const { success, data } = updateBlogInput.safeParse(body);
     if (!success) {
@@ -134,7 +206,7 @@ blogRouter.patch("/:id", async (c) => {
 
     const id = c.req.param("id");
     const userId = c.get("userId");
-    
+
     // check if the blog exists and belongs to same user
     const existingBlog = await prisma.post.findFirst({
       where: {
@@ -142,12 +214,14 @@ blogRouter.patch("/:id", async (c) => {
         authorId: userId,
       },
     });
-    
+
     if (!existingBlog) {
       c.status(404);
-      return c.json({ error: "Blog not found or you don't have permission to modify it" });
+      return c.json({
+        error: "Blog not found or you don't have permission to modify it",
+      });
     }
-    
+
     const modifiedBlog = await prisma.post.update({
       where: {
         id: id,

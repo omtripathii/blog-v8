@@ -21,12 +21,28 @@ export const Signin = () => {
         `${BACKEND_URL}/api/v1/user/signin`,
         form
       );
-      const jwt = response.data.jwt;
-      localStorage.setItem("token", jwt);
-      console.log("Signin form submitted:", form);
-      navigate("/blogs");
-    } catch (error) {
-      alert("Something went Wrong PLease Try Again");
+      console.log('Full response:', response.data); // Debug log
+      
+      // Check if the response contains a token
+      if (response.data.token) {
+        const jwt = response.data.token; 
+        console.log('Token received:', jwt); // Debug log
+        localStorage.setItem("token", jwt);
+        console.log('Token stored in localStorage:', localStorage.getItem("token")); // Debug log
+        navigate("/blogs");
+      } else {
+        // Handle case where signin was successful but no token
+        console.error('No token in response:', response.data);
+        alert("Signin failed: No token received");
+      }
+    } catch (error: any) {
+      console.error('Signin error:', error);
+      // Better error handling
+      if (error.response?.data?.error) {
+        alert(error.response.data.error);
+      } else {
+        alert("Something went Wrong Please Try Again");
+      }
     }
   };
 

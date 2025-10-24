@@ -37,7 +37,7 @@ userRouter.post("/signup", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
-  
+
   // Validation
   const { success, data } = signupInput.safeParse(body);
   if (!success) {
@@ -50,15 +50,16 @@ userRouter.post("/signup", async (c) => {
       data: {
         email: data.email,
         password: data.password,
-        name: data.name
+        name: data.name,
       },
     });
     // Jwt Token Cretion
-    const token = await sign(
-      { id: user.id, email: user.email },
-      c.env.JWT_SECRET
-    );
-    return c.json({ jwt: token });
+    const token = await sign({ userId: user.id }, c.env.JWT_SECRET);
+    // console.log('Generated token for signup - userId:', user.id); // Debug log
+    return c.json({
+      message: "User created successfully",
+      token: token,
+    });
   } catch (error: any) {
     return c.text(`Something Went Wrong: ${error.message}`);
   }
@@ -71,7 +72,8 @@ userRouter.post("/signin", async (c) => {
   }).$extends(withAccelerate());
 
   const body = await c.req.json();
-  
+  // console.log('Signin request body:', body); // Debug log
+
   // Validation
   const { success, data } = signinInput.safeParse(body);
   if (!success) {
@@ -79,19 +81,31 @@ userRouter.post("/signin", async (c) => {
     return c.json({ error: "Invalid input" });
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      email: data.email,
-      password: data.password,
-    },
-  });
-  if (!user) {
-    return c.text("Invalid Credentials Given");
+  try {
+    // Fix: Use separate where conditions instead of combining them
+    const user = await prisma.user.findFirst({
+      where: {
+        email: data.email,
+        password: data.password, // i need to hash passwords alsp
+      },
+    });
+
+    // console.log('User found:', user ? 'yes' : 'no'); // Debug log
+
+    if (!user) {
+      return c.json({ error: "Invalid Credentials Given" }, 401);
+    }
+
+    // JWT Token Creation
+    const token = await sign({ userId: user.id }, c.env.JWT_SECRET);
+    // console.log('Generated token for signin - userId:', user.id); // Debug log
+
+    return c.json({
+      message: "User signed in successfully",
+      token: token,
+    });
+  } catch (error) {
+    console.error("Signin error:", error);
+    return c.json({ error: `Something went wrong: ${error}` }, 500);
   }
-  // Jwt Token Cretion
-  const token = await sign(
-    { id: user.id, email: user.email },
-    c.env.JWT_SECRET
-  );
-  return c.json({ jwt: token });
 });

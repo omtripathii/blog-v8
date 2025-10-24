@@ -22,11 +22,14 @@ export const Signup = () => {
         `${BACKEND_URL}/api/v1/user/signup`,
         form
       );
-      const jwt = response.data.jwt;
+      console.log('Full response:', response.data); // Debug log
+      const jwt = response.data.token; 
+      console.log('Token received:', jwt); // Debug log
       localStorage.setItem("token", jwt);
-      console.log("Signup form submitted:", form);
+      console.log('Token stored in localStorage:', localStorage.getItem("token")); // Debug log
       navigate("/blogs");
     } catch (error) {
+      console.error('Signup error:', error);
       alert("Something went Wrong PLease Try Again");
     }
   };

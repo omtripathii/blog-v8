@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { Avatar } from "./BlogCard";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";

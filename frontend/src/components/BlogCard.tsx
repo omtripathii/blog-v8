@@ -61,7 +61,7 @@ const DotSeparator = () => (
 
 interface AvatarProps {
   name?: string | "A";
-  size?: number; // size in pixels
+  size?: number; 
 }
 
 export function Avatar({ name, size = 32 }: AvatarProps) {

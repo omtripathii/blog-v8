@@ -42,7 +42,9 @@ export const Appbar = ({
 
     // Validate blog content
     if (!blogTitle.trim() || !blogContent.trim()) {
-      setToastMessage("Please fill in both title and content before publishing");
+      setToastMessage(
+        "Please fill in both title and content before publishing"
+      );
       setShowToast(true);
       return;
     }
@@ -83,7 +85,6 @@ export const Appbar = ({
   return (
     <>
       <header className="flex justify-between items-center px-3 md:px-10 py-3 border-b border-gray-200 bg-white sticky top-0 z-50 transition-all duration-300">
-        {/* Logo/Brand Section - Clean and minimalist */}
         <div
           className="flex items-center cursor-pointer "
           onClick={() => navigate("/blogs")}
@@ -99,10 +100,7 @@ export const Appbar = ({
           </div>
         </div>
 
-        {/* Action and User Section */}
         <div className="flex items-center gap-6">
-          {/* Write Button - Green for action, like Medium */}
-
           {isPublishPage ? (
             <button
               onClick={handlePublish}
@@ -123,7 +121,7 @@ export const Appbar = ({
               Write
             </button>
           )}
-          {/* User Avatar and Dropdown */}
+
           <div className="relative">
             <div
               onClick={() => setOpen(!open)}
@@ -157,13 +155,7 @@ export const Appbar = ({
         </div>
       </header>
 
-      {/* Toast notification */}
-      {showToast && (
-        <SuccessToast
-          message={toastMessage}
-          duration={3000}
-        />
-      )}
+      {showToast && <SuccessToast message={toastMessage} duration={3000} />}
     </>
   );
 };

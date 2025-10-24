@@ -107,7 +107,7 @@ blogRouter.get("/userDetails", async (c) => {
   }
 });
 
-// Fetching All Blogs - MOVED BEFORE /:id route
+// Fetching All Blogs
 blogRouter.get("/bulk", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env?.DATABASE_URL,

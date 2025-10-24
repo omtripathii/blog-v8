@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { BACKEND_URL } from "../config";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export const useUser = () => {
+  const navigate = useNavigate();
   type UserDetail = {
     name?: string;
     email?: string;
@@ -11,10 +13,10 @@ export const useUser = () => {
   
   useEffect(() => {
     const token = localStorage.getItem("token");
-    // console.log('Token from localStorage:', token); // Debug log
     
     if (!token || token === 'undefined' || token === 'null') {
       console.log("No valid token found");
+      navigate("/signin");
       return;
     }
 
@@ -25,17 +27,17 @@ export const useUser = () => {
         },
       })
       .then((response) => {
-        // console.log('User details response:', response.data); // Debug log
         setUserdetails(response.data);
       })
       .catch((error) => {
         console.error("Error fetching user details:", error);
-        // If token is invalid, clear it
+        // If token is invalid, clear it and redirect
         if (error.response?.status === 401) {
           localStorage.removeItem("token");
+          navigate("/signin");
         }
       });
-  }, []);
+  }, [navigate]);
   
   return { userDetails };
 };

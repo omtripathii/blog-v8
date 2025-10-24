@@ -4,19 +4,15 @@ A modern, full-stack Medium-inspired blogging platform built with React, TypeScr
 
 ## 📸 Screenshots
 
-<!-- Screenshots will be added here -->
 ![Homepage Screenshot](assests/Screenshot 2025-10-25 020008.png)
 
-![Blog Feed Screenshot](path/to/blog-feed-screenshot.png)
+![Blog Feed Screenshot](assests/Screenshot 2025-10-25 015015.png)
 
+![Blog Reading Screenshot](assests/Screenshot 2025-10-25 015514.png)
 
-![Blog Reading Screenshot](path/to/blog-reading-screenshot.png)
+![Blog Writing Screenshot](assests/Screenshot 2025-10-25 015028.png)
 
-
-![Blog Writing Screenshot](path/to/blog-writing-screenshot.png)
-
-
-![Mobile Screenshot](path/to/mobile-screenshot.png)
+![Mobile Screenshot](assests/Screenshot 2025-10-25 015444.png)
 
 ---
 

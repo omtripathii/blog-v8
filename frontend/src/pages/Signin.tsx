@@ -9,6 +9,7 @@ export const Signin = () => {
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -16,6 +17,7 @@ export const Signin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await axios.post(
         `${BACKEND_URL}/api/v1/user/signin`,
@@ -34,6 +36,7 @@ export const Signin = () => {
         // Handle case where signin was successful but no token
         console.error('No token in response:', response.data);
         alert("Signin failed: No token received");
+        setLoading(false);
       }
     } catch (error: any) {
       console.error('Signin error:', error);
@@ -43,6 +46,7 @@ export const Signin = () => {
       } else {
         alert("Something went Wrong Please Try Again");
       }
+      setLoading(false);
     }
   };
 
@@ -91,9 +95,10 @@ export const Signin = () => {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-black text-white font-medium py-2 rounded-lg hover:bg-gray-800 transition"
+            disabled={loading}
+            className={`w-full bg-black text-white font-medium py-2 rounded-lg transition ${loading ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-800'}`}
           >
-            Sign In
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
       </div>

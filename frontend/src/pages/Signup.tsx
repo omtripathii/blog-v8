@@ -10,6 +10,7 @@ export const Signup = () => {
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -17,6 +18,7 @@ export const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await axios.post(
         `${BACKEND_URL}/api/v1/user/signup`,
@@ -31,6 +33,7 @@ export const Signup = () => {
     } catch (error) {
       console.error('Signup error:', error);
       alert("Something went Wrong PLease Try Again");
+      setLoading(false);
     }
   };
 
@@ -96,9 +99,10 @@ export const Signup = () => {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-black text-white font-medium py-2 rounded-lg hover:bg-gray-800 transition"
+            disabled={loading}
+            className={`w-full bg-black text-white font-medium py-2 rounded-lg transition ${loading ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-800'}`}
           >
-            Sign Up
+            {loading ? 'Signing up...' : 'Sign Up'}
           </button>
         </form>
       </div>
